@@ -23,8 +23,12 @@ a:hover {
   text-decoration: underline;
 }
 
-.navbar a.active {
-  text-decoration: underline;
+/* add type section */
+.add-type {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 .App {
   text-align: center;

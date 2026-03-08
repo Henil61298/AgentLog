@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { getCustomers, getWorkLogs } from "../services/firestoreService";
+import { getCustomers, getAllInvestments } from "../services/firestoreService";
 import CustomerGrid from "../components/CustomerGrid";
+import InvestmentsGrid from "../components/InvestmentsGrid";
 import Insights from "../components/Insights";
 
 export default function Dashboard() {
   const [customers, setCustomers] = useState([]);
-  const [logs, setLogs] = useState([]);
+  const [investments, setInvestments] = useState([]);
   const [filter, setFilter] = useState("");
 
   const { logout, currentUser } = useAuth();
@@ -15,11 +16,7 @@ export default function Dashboard() {
     if (!currentUser) return;
     const uid = currentUser.uid;
     getCustomers(uid).then(setCustomers).catch(console.error);
-    getWorkLogs(uid, { orderBy: "date", direction: "asc" })
-      .then((items) => {
-        setLogs(items);
-      })
-      .catch(console.error);
+    getAllInvestments(uid).then(setInvestments).catch(console.error);
   }, [currentUser]);
 
   // filter customers
@@ -29,40 +26,23 @@ export default function Dashboard() {
     );
   }, [customers, filter]);
 
-  // calculate total portfolio (sum of customer portfolioValue)
+  // calculate total portfolio (sum of all investments)
   const totalPortfolio = useMemo(() => {
-    return filteredCustomers.reduce(
-      (sum, c) => sum + (c.portfolioValue || 0),
-      0,
-    );
-  }, [filteredCustomers]);
-
-  // prepare data for chart (simple example)
-  const chartData = logs.map((log) => ({
-    date: log.date,
-    value: log.value || 1,
-  }));
+    return investments.reduce((sum, inv) => sum + (inv.value || 0), 0);
+  }, [investments]);
 
   return (
     <div>
       <div className="dashboard-header">
         <h1>Agent Dashboard</h1>
-        <div>Total Portfolio: INR {totalPortfolio.toLocaleString()}</div>
+        <div>Total Portfolio: ₹ {totalPortfolio.toLocaleString()}</div>
       </div>
       <div className="section">
         <h2>Customers</h2>
-        <input
-          type="text"
-          placeholder="Filter by customer name"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ marginBottom: "1rem", width: "100%" }}
-        />
-        <CustomerGrid customers={filteredCustomers} />
+        <CustomerGrid customers={filteredCustomers} investments={investments} />
       </div>
       <div className="section">
-        <h2>Insights</h2>
-        <Insights data={chartData} />
+        <InvestmentsGrid investments={investments} customers={customers} />
       </div>
     </div>
   );
