@@ -99,9 +99,9 @@ export default function AddCustomer() {
   };
 
   return (
-    <div>
+    <div className="form-page-wrapper">
       <h1>{editMode ? "Edit Customer" : "Add Customer"}</h1>
-      <form onSubmit={handleSubmitWithCheck} className="auth-container">
+      <form onSubmit={handleSubmitWithCheck}>
         <label>First Name</label>
         <input
           name="firstName"
@@ -152,6 +152,7 @@ export default function AddCustomer() {
         </button>
         {editMode && (
           <button
+            style={{ marginLeft: "10px" }}
             type="button"
             onClick={() => {
               setEditMode(false);

@@ -256,10 +256,11 @@ export default function InvestmentsGrid({
         }}
       >
         <h2>Investments</h2>
-        <div>Total Portfolio Value: ₹ {totalAmount.toLocaleString()}</div>
+        <div className="portfolio-value">
+          Total Portfolio Value: ₹ {totalAmount.toLocaleString()}
+        </div>
       </div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h3>Filters</h3>
         <div
           style={{
             display: "grid",

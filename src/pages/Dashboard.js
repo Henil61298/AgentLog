@@ -10,7 +10,7 @@ import {
 import CustomerGrid from "../components/CustomerGrid";
 import InvestmentsGrid from "../components/InvestmentsGrid";
 import Insights from "../components/Insights";
-import emailjs from '@emailjs/browser';
+import emailjs from "@emailjs/browser";
 
 export default function Dashboard() {
   const [customers, setCustomers] = useState([]);
@@ -24,15 +24,18 @@ export default function Dashboard() {
     const uid = currentUser.uid;
     getCustomers(uid).then(setCustomers).catch(console.error);
     getAllInvestments(uid).then(setInvestments).catch(console.error);
-    
+
     // Check for notifications
     checkNotifications(uid);
-    
+
     // Set up periodic notification check (every 6 hours)
-    const interval = setInterval(() => {
-      checkNotifications(uid);
-    }, 6 * 60 * 60 * 1000); // 6 hours
-    
+    const interval = setInterval(
+      () => {
+        checkNotifications(uid);
+      },
+      6 * 60 * 60 * 1000,
+    ); // 6 hours
+
     return () => clearInterval(interval);
   }, [currentUser]);
 
@@ -42,53 +45,70 @@ export default function Dashboard() {
       const profile = await getUserProfile(userId);
       const browserDays = profile?.browserNotificationDays || 7;
       const emailDays = profile?.emailNotificationDays || 7;
-      
+
       const investments = await getAllInvestments(userId);
       const customers = await getCustomers(userId);
-      
+
       const now = new Date();
-      
+
       // prepare lists separately
-      const browserUpcoming = investments.filter(inv => {
+      const browserUpcoming = investments.filter((inv) => {
         if (!inv.endDate) return false;
         const endDate = new Date(inv.endDate);
-        const future = new Date(); future.setDate(now.getDate() + browserDays);
+        const future = new Date();
+        future.setDate(now.getDate() + browserDays);
         return endDate >= now && endDate <= future;
       });
-      const emailUpcoming = investments.filter(inv => {
+      const emailUpcoming = investments.filter((inv) => {
         if (!inv.endDate) return false;
         const endDate = new Date(inv.endDate);
-        const future = new Date(); future.setDate(now.getDate() + emailDays);
+        const future = new Date();
+        future.setDate(now.getDate() + emailDays);
         return endDate >= now && endDate <= future;
       });
-      
+
       const customerMap = {};
-      customers.forEach(c => customerMap[c.id] = c.name);
-      
+      customers.forEach((c) => (customerMap[c.id] = c.name));
+
       // Browser notifications
-      if (profile?.enableBrowserNotifications && "Notification" in window && Notification.permission === "granted") {
-        browserUpcoming.forEach(inv => {
+      if (
+        profile?.enableBrowserNotifications &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        browserUpcoming.forEach((inv) => {
           const customerName = customerMap[inv.customerId] || "Unknown";
           const endDate = new Date(inv.endDate).toLocaleDateString();
-          const daysLeft = Math.ceil((new Date(inv.endDate) - now) / (1000 * 60 * 60 * 24));
+          const daysLeft = Math.ceil(
+            (new Date(inv.endDate) - now) / (1000 * 60 * 60 * 24),
+          );
           new Notification("Investment Ending Soon", {
-            body: `${customerName}'s ${inv.type || 'investment'} ends on ${endDate} (${daysLeft} days left)`,
+            body: `${customerName}'s ${inv.type || "investment"} ends on ${endDate} (${daysLeft} days left)`,
             icon: "/favicon.ico",
             tag: `investment-${inv.id}`,
           });
         });
       }
-      
+
       // Email notifications
-      if (profile?.enableEmailNotifications && profile.emailjsServiceId && profile.emailjsTemplateId && profile.emailjsPublicKey) {
+      if (
+        profile?.enableEmailNotifications &&
+        profile.emailjsServiceId &&
+        profile.emailjsTemplateId &&
+        profile.emailjsPublicKey
+      ) {
         try {
           emailjs.init(profile.emailjsPublicKey);
-          const upcomingList = emailUpcoming.map(inv => {
-            const customerName = customerMap[inv.customerId] || "Unknown";
-            const endDate = new Date(inv.endDate).toLocaleDateString();
-            const daysLeft = Math.ceil((new Date(inv.endDate) - now) / (1000 * 60 * 60 * 24));
-            return `• ${customerName}'s ${inv.type || 'investment'} - ${endDate} (${daysLeft} days)`;
-          }).join('\n');
+          const upcomingList = emailUpcoming
+            .map((inv) => {
+              const customerName = customerMap[inv.customerId] || "Unknown";
+              const endDate = new Date(inv.endDate).toLocaleDateString();
+              const daysLeft = Math.ceil(
+                (new Date(inv.endDate) - now) / (1000 * 60 * 60 * 24),
+              );
+              return `• ${customerName}'s ${inv.type || "investment"} - ${endDate} (${daysLeft} days)`;
+            })
+            .join("\n");
           const templateParams = {
             to_email: profile.email,
             to_name: profile.name || "User",
@@ -98,7 +118,7 @@ export default function Dashboard() {
           await emailjs.send(
             profile.emailjsServiceId,
             profile.emailjsTemplateId,
-            templateParams
+            templateParams,
           );
           console.log("Email notification sent successfully");
         } catch (emailError) {
@@ -190,7 +210,9 @@ export default function Dashboard() {
     <div>
       <div className="dashboard-header">
         <h1>Agent Dashboard</h1>
-        <div>Total Portfolio: ₹ {totalPortfolio.toLocaleString()}</div>
+        <div className="portfolio-value">
+          Total Portfolio: ₹ {totalPortfolio.toLocaleString()}
+        </div>
       </div>
       <div className="section">
         <h2>Customers</h2>

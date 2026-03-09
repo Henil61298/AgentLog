@@ -72,9 +72,9 @@ export default function Investments() {
   };
 
   return (
-    <div>
+    <div className="form-page-wrapper">
       <h1>Manage Investments</h1>
-      <form onSubmit={handleSubmit} className="auth-container">
+      <form onSubmit={handleSubmit}>
         <label>Customer</label>
         <select
           value={selectedCustomer}
