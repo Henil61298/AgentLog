@@ -14,6 +14,7 @@ import Signup from "./pages/Signup";
 import InsightsPage from "./pages/InsightsPage";
 import Investments from "./pages/Investments";
 import AddCustomer from "./pages/AddCustomer";
+import Profile from "./pages/Profile";
 import Layout from "./components/Layout";
 
 function PrivateRoute({ children }) {
@@ -55,6 +56,14 @@ function App() {
             element={
               <PrivateRoute>
                 <AddCustomer />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
               </PrivateRoute>
             }
           />

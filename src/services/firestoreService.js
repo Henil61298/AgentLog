@@ -9,6 +9,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 
 // TODO: adjust collection names/structure as needed
@@ -77,4 +79,25 @@ export async function updateInvestment(agentId, investmentId, updates) {
 export async function deleteInvestment(agentId, investmentId) {
   const ref = doc(db, "agents", agentId, "workLogs", investmentId);
   await deleteDoc(ref);
+}
+
+export async function getUserProfile(agentId) {
+  const ref = doc(db, "agents", agentId);
+  try {
+    const docSnap = await getDoc(ref);
+    return docSnap.exists() ? docSnap.data() : null;
+  } catch (error) {
+    console.error("Error getting user profile:", error);
+    return null;
+  }
+}
+
+export async function updateUserProfile(agentId, profile) {
+  const ref = doc(db, "agents", agentId);
+  await updateDoc(ref, profile);
+}
+
+export async function createUserProfile(agentId, profile) {
+  const ref = doc(db, "agents", agentId);
+  await setDoc(ref, profile);
 }

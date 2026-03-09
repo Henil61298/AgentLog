@@ -41,6 +41,12 @@ export default function Layout({ children }) {
             >
               Add Customer
             </Link>
+            <Link
+              to="/profile"
+              className={location.pathname === "/profile" ? "active" : ""}
+            >
+              Profile
+            </Link>
             <button
               onClick={handleLogout}
               style={{
