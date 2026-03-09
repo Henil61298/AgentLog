@@ -1,11 +1,11 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import InsightsIcon from '@mui/icons-material/Insights';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import InsightsIcon from "@mui/icons-material/Insights";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 export default function Layout({ children }) {
   const { currentUser, logout } = useAuth();
