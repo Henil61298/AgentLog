@@ -6,6 +6,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import InsightsIcon from "@mui/icons-material/Insights";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 export default function Layout({ children }) {
   const { currentUser, logout } = useAuth();
@@ -24,7 +25,13 @@ export default function Layout({ children }) {
       <header className="navbar">
         <Link to="/">AgentLog</Link>
         {currentUser && (
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              marginRight: "1rem",
+              alignItems: "center",
+            }}
+          >
             <Link
               to="/profile"
               className={location.pathname === "/profile" ? "active" : ""}
@@ -69,6 +76,14 @@ export default function Layout({ children }) {
             >
               <InsightsIcon />
               <span>Insights</span>
+            </Link>
+            <Link
+              to="/investments"
+              className={`sidebar-link ${location.pathname === "/investments" ? "active" : ""}`}
+              title="Investments"
+            >
+              <TrendingUpIcon />
+              <span>Investments</span>
             </Link>
             <Link
               to="/add-customer"

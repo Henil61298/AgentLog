@@ -262,7 +262,7 @@ export default function InsightsPage() {
       </div>
 
       {/* Table of investments */}
-      <div style={{ height: 400, width: "100%", marginTop: "1rem" }}>
+      <div style={{ height: 400, width: "100%", marginTop: "6rem" }}>
         <DataGrid rows={tableRows} columns={tableColumns} pageSize={5} />
       </div>
     </div>
