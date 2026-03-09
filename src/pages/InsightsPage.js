@@ -178,7 +178,9 @@ export default function InsightsPage() {
         <button onClick={clearFilters} style={{ margin: "0 0.5rem" }}>
           Clear
         </button>
-        <label style={{ margin: "0 0.5rem" }}>Customer:</label>
+        <div style={{ marginTop: "10px" }}>
+          <label style={{ margin: "0 0.5rem" }}>Customer:</label>
+        </div>
         <select
           value={customerFilter}
           onChange={(e) => setCustomerFilter(e.target.value)}

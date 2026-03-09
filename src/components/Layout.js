@@ -1,6 +1,11 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useLocation } from "react-router-dom";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import InsightsIcon from '@mui/icons-material/Insights';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 export default function Layout({ children }) {
   const { currentUser, logout } = useAuth();
@@ -19,33 +24,14 @@ export default function Layout({ children }) {
       <header className="navbar">
         <Link to="/">AgentLog</Link>
         {currentUser && (
-          <nav style={{ display: "flex", gap: "1rem" }}>
-            <Link to="/" className={location.pathname === "/" ? "active" : ""}>
-              Dashboard
-            </Link>
-            <Link
-              to="/insights"
-              className={location.pathname === "/insights" ? "active" : ""}
-            >
-              Insights
-            </Link>
-            <Link
-              to="/investments"
-              className={location.pathname === "/investments" ? "active" : ""}
-            >
-              Investments
-            </Link>
-            <Link
-              to="/add-customer"
-              className={location.pathname === "/add-customer" ? "active" : ""}
-            >
-              Add Customer
-            </Link>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <Link
               to="/profile"
               className={location.pathname === "/profile" ? "active" : ""}
+              title="Profile"
+              style={{ display: "flex", alignItems: "center" }}
             >
-              Profile
+              <AccountCircleIcon />
             </Link>
             <button
               onClick={handleLogout}
@@ -54,14 +40,49 @@ export default function Layout({ children }) {
                 border: "none",
                 color: "white",
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
               }}
+              title="Logout"
             >
-              Logout
+              <ExitToAppIcon />
             </button>
-          </nav>
+          </div>
         )}
       </header>
-      <main className="container">{children}</main>
+
+      {currentUser && (
+        <aside className="sidebar">
+          <nav className="sidebar-nav">
+            <Link
+              to="/"
+              className={`sidebar-link ${location.pathname === "/" ? "active" : ""}`}
+              title="Dashboard"
+            >
+              <DashboardIcon />
+              <span>Dashboard</span>
+            </Link>
+            <Link
+              to="/insights"
+              className={`sidebar-link ${location.pathname === "/insights" ? "active" : ""}`}
+              title="Insights"
+            >
+              <InsightsIcon />
+              <span>Insights</span>
+            </Link>
+            <Link
+              to="/add-customer"
+              className={`sidebar-link ${location.pathname === "/add-customer" ? "active" : ""}`}
+              title="Add Customer"
+            >
+              <PersonAddIcon />
+              <span>Add Customer</span>
+            </Link>
+          </nav>
+        </aside>
+      )}
+
+      <main className="main-content">{children}</main>
     </>
   );
 }
