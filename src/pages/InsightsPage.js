@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import {
-  getAllInvestments,
-  getCustomers,
-} from "../services/firestoreService";
+import { getAllInvestments, getCustomers } from "../services/firestoreService";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   LineChart,
@@ -48,9 +45,7 @@ export default function InsightsPage() {
   useEffect(() => {
     if (!currentUser) return;
     const uid = currentUser.uid;
-    getAllInvestments(uid)
-      .then(setInvestments)
-      .catch(console.error);
+    getAllInvestments(uid).then(setInvestments).catch(console.error);
     getCustomers(uid).then(setCustomers).catch(console.error);
   }, [currentUser]);
 
@@ -130,10 +125,35 @@ export default function InsightsPage() {
   });
 
   const tableColumns = [
-    { field: "date", headerName: "Date", width: 130, align: "center", headerAlign: "center" },
-    { field: "customer", headerName: "Customer", width: 140, align: "center", headerAlign: "center" },
-    { field: "type", headerName: "Type", width: 120, align: "center", headerAlign: "center" },
-    { field: "amount", headerName: "Amount", width: 130, type: "number", align: "center", headerAlign: "center" },
+    {
+      field: "date",
+      headerName: "Date",
+      width: 130,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "customer",
+      headerName: "Customer",
+      width: 140,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "type",
+      headerName: "Type",
+      width: 120,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "amount",
+      headerName: "Amount",
+      width: 130,
+      type: "number",
+      align: "center",
+      headerAlign: "center",
+    },
   ];
 
   return (
@@ -174,8 +194,10 @@ export default function InsightsPage() {
 
       {startDateFilter && endDateFilter && (
         <div style={{ marginBottom: "1rem" }}>
-          <strong>Current Total:</strong> ₹ {currentTotal.toLocaleString()} <br />
-          <strong>Previous Total:</strong> ₹ {previousTotal.toLocaleString()} <br />
+          <strong>Current Total:</strong> ₹ {currentTotal.toLocaleString()}{" "}
+          <br />
+          <strong>Previous Total:</strong> ₹ {previousTotal.toLocaleString()}{" "}
+          <br />
           <strong>Change:</strong> {percentChange.toFixed(2)} %
         </div>
       )}
