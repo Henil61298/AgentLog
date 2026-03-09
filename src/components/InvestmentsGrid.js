@@ -1,16 +1,114 @@
 import React, { useState, useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Box,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
 
-export default function InvestmentsGrid({ investments, customers }) {
+export default function InvestmentsGrid({
+  investments,
+  customers,
+  onUpdateInvestment,
+  onDeleteInvestment,
+  currentUser,
+}) {
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editData, setEditData] = useState(null);
+  const [newAmount, setNewAmount] = useState("");
 
   // get unique types
   const uniqueTypes = useMemo(() => {
     return [...new Set(investments.map((inv) => inv.type))].filter(Boolean);
   }, [investments]);
+
+  const handleEditClick = (investment) => {
+    setEditData(investment);
+    setNewAmount(investment.value?.toString() || "");
+    setOpenDialog(true);
+  };
+
+  const handleDeleteClick = (investment) => {
+    if (window.confirm(`Delete this investment of ₹${investment.value}?`)) {
+      const customerName = customers.find(
+        (c) => c.id === investment.customerId,
+      )?.name;
+      handleDeleteSingleInvestment(investment, customerName);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditData(null);
+    setNewAmount("");
+  };
+
+  const handleSaveAmount = async () => {
+    if (!editData || !newAmount) return;
+    const amount = parseFloat(newAmount);
+    if (isNaN(amount) || amount < 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      const { updateInvestment } = await import("../services/firestoreService");
+      await updateInvestment(currentUser.uid, editData.id, {
+        value: amount,
+      });
+      // Trigger refresh via parent callback
+      onUpdateInvestment(editData, amount);
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Error updating investment:", error);
+      alert("Failed to update investment");
+    }
+  };
+
+  const handleDeleteSingleInvestment = async (investment, customerName) => {
+    try {
+      const { deleteInvestment } = await import("../services/firestoreService");
+      await deleteInvestment(currentUser.uid, investment.id);
+      // Trigger refresh via parent callback
+      onDeleteInvestment({ ...investment, name: customerName });
+    } catch (error) {
+      console.error("Error deleting investment:", error);
+      alert("Failed to delete investment");
+    }
+  };
+
+  const RenderActionButtons = (params) => {
+    return (
+      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+        <IconButton
+          size="small"
+          onClick={() => handleEditClick(params.row)}
+          title="Edit Amount"
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => handleDeleteClick(params.row)}
+          title="Delete Investment"
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    );
+  };
 
   // filter investments by date range
   const filtered = useMemo(() => {
@@ -38,9 +136,11 @@ export default function InvestmentsGrid({ investments, customers }) {
         const customer = customers.find((c) => c.id === inv.customerId);
         return {
           id: inv.id || idx,
+          customerId: inv.customerId,
           customerName: customer?.name || "Unknown",
           investmentType: inv.type,
           amount: inv.value || 0,
+          value: inv.value || 0,
           startDate: inv.startDate,
           endDate: inv.endDate,
         };
@@ -67,21 +167,77 @@ export default function InvestmentsGrid({ investments, customers }) {
 
   const columns = hasDateFilter
     ? [
-        { field: "customerName", headerName: "Customer", width: 150 },
-        { field: "investmentType", headerName: "Type", width: 120 },
-        { field: "amount", headerName: "Amount", width: 130, type: "number" },
-        { field: "startDate", headerName: "Start Date", width: 130 },
-        { field: "endDate", headerName: "End Date", width: 130 },
+        {
+          field: "customerName",
+          headerName: "Customer",
+          width: 150,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "investmentType",
+          headerName: "Type",
+          width: 120,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "amount",
+          headerName: "Amount",
+          width: 130,
+          type: "number",
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "startDate",
+          headerName: "Start Date",
+          width: 130,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "endDate",
+          headerName: "End Date",
+          width: 130,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "actions",
+          headerName: "Actions",
+          width: 120,
+          sortable: false,
+          filterable: false,
+          align: "center",
+          headerAlign: "center",
+          renderCell: RenderActionButtons,
+        },
       ]
     : [
-        { field: "investmentType", headerName: "Investment Type", width: 150 },
+        {
+          field: "investmentType",
+          headerName: "Investment Type",
+          width: 150,
+          align: "center",
+          headerAlign: "center",
+        },
         {
           field: "totalAmount",
           headerName: "Total Amount",
           width: 150,
           type: "number",
+          align: "center",
+          headerAlign: "center",
         },
-        { field: "count", headerName: "Count", width: 100, type: "number" },
+        {
+          field: "count",
+          headerName: "Count",
+          width: 100,
+          type: "number",
+          align: "center",
+          headerAlign: "center",
+        },
       ];
 
   const totalAmount = displayData.reduce((sum, row) => {
@@ -167,6 +323,47 @@ export default function InvestmentsGrid({ investments, customers }) {
       <div style={{ height: 400, width: "100%" }} className="data-grid-card">
         <DataGrid rows={displayData} columns={columns} pageSize={5} />
       </div>
+
+      {/* Edit Amount Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Edit Investment Amount</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <TextField
+            autoFocus
+            type="number"
+            label="New Amount (₹)"
+            value={newAmount}
+            onChange={(e) => setNewAmount(e.target.value)}
+            fullWidth
+            margin="dense"
+            inputProps={{ step: "0.01", min: "0" }}
+          />
+          {editData && (
+            <Box sx={{ mt: 2, fontSize: "0.9rem", color: "gray" }}>
+              <div>
+                Customer:{" "}
+                <strong>
+                  {customers.find((c) => c.id === editData.customerId)?.name ||
+                    "Unknown"}
+                </strong>
+              </div>
+              <div>
+                Type: <strong>{editData.investmentType}</strong>
+              </div>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button
+            onClick={handleSaveAmount}
+            variant="contained"
+            color="primary"
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <div
         style={{

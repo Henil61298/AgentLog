@@ -68,3 +68,13 @@ export async function deleteCustomer(agentId, customerId) {
   const ref = doc(db, "agents", agentId, "customers", customerId);
   await deleteDoc(ref);
 }
+
+export async function updateInvestment(agentId, investmentId, updates) {
+  const ref = doc(db, "agents", agentId, "workLogs", investmentId);
+  await updateDoc(ref, updates);
+}
+
+export async function deleteInvestment(agentId, investmentId) {
+  const ref = doc(db, "agents", agentId, "workLogs", investmentId);
+  await deleteDoc(ref);
+}

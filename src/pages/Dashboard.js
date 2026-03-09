@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { getCustomers, getAllInvestments } from "../services/firestoreService";
+import {
+  getCustomers,
+  getAllInvestments,
+  updateInvestment,
+  deleteInvestment,
+} from "../services/firestoreService";
 import CustomerGrid from "../components/CustomerGrid";
 import InvestmentsGrid from "../components/InvestmentsGrid";
 import Insights from "../components/Insights";
@@ -31,6 +36,70 @@ export default function Dashboard() {
     return investments.reduce((sum, inv) => sum + (inv.value || 0), 0);
   }, [investments]);
 
+  // Handle update investment amount
+  const handleUpdateInvestment = async (rowData, newAmount) => {
+    try {
+      const investmentsForRow = investments.filter(
+        (inv) =>
+          inv.customerId === rowData.customerId &&
+          inv.type === rowData.investmentType,
+      );
+
+      if (investmentsForRow.length === 0) return;
+
+      // If there's only one investment, update it directly
+      if (investmentsForRow.length === 1) {
+        await updateInvestment(currentUser.uid, investmentsForRow[0].id, {
+          value: newAmount,
+        });
+      } else {
+        // If multiple investments, proportionally distribute the new amount
+        const oldTotal = investmentsForRow.reduce(
+          (sum, inv) => sum + (inv.value || 0),
+          0,
+        );
+        const ratio = oldTotal > 0 ? newAmount / oldTotal : 0;
+
+        for (const inv of investmentsForRow) {
+          const newValue = inv.value * ratio;
+          await updateInvestment(currentUser.uid, inv.id, {
+            value: newValue,
+          });
+        }
+      }
+
+      // Refresh investments
+      const updatedInvestments = await getAllInvestments(currentUser.uid);
+      setInvestments(updatedInvestments);
+    } catch (error) {
+      console.error("Error updating investment:", error);
+      alert("Failed to update investment");
+    }
+  };
+
+  // Handle delete investment(s)
+  const handleDeleteInvestment = async (rowData) => {
+    try {
+      const investmentsForRow = investments.filter(
+        (inv) =>
+          inv.customerId === rowData.customerId &&
+          inv.type === rowData.investmentType,
+      );
+
+      // Delete all investments for this customer-type combination
+      for (const inv of investmentsForRow) {
+        await deleteInvestment(currentUser.uid, inv.id);
+      }
+
+      // Refresh investments
+      const updatedInvestments = await getAllInvestments(currentUser.uid);
+      setInvestments(updatedInvestments);
+    } catch (error) {
+      console.error("Error deleting investment:", error);
+      alert("Failed to delete investment");
+    }
+  };
+
   return (
     <div>
       <div className="dashboard-header">
@@ -39,10 +108,21 @@ export default function Dashboard() {
       </div>
       <div className="section">
         <h2>Customers</h2>
-        <CustomerGrid customers={filteredCustomers} investments={investments} />
+        <CustomerGrid
+          customers={filteredCustomers}
+          investments={investments}
+          onUpdateInvestment={handleUpdateInvestment}
+          onDeleteInvestment={handleDeleteInvestment}
+        />
       </div>
       <div className="section">
-        <InvestmentsGrid investments={investments} customers={customers} />
+        <InvestmentsGrid
+          investments={investments}
+          customers={customers}
+          onUpdateInvestment={handleUpdateInvestment}
+          onDeleteInvestment={handleDeleteInvestment}
+          currentUser={currentUser}
+        />
       </div>
     </div>
   );
