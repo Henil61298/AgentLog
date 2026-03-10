@@ -6,6 +6,7 @@ import {
   updateInvestment,
   deleteInvestment,
   getUserProfile,
+  updateUserProfile,
 } from "../services/firestoreService";
 import CustomerGrid from "../components/CustomerGrid";
 import InvestmentsGrid from "../components/InvestmentsGrid";
@@ -95,34 +96,42 @@ export default function Dashboard() {
         profile?.enableEmailNotifications &&
         profile.emailjsServiceId &&
         profile.emailjsTemplateId &&
-        profile.emailjsPublicKey
+        profile.emailjsPublicKey &&
+        emailUpcoming.length > 0
       ) {
-        try {
-          emailjs.init(profile.emailjsPublicKey);
-          const upcomingList = emailUpcoming
-            .map((inv) => {
-              const customerName = customerMap[inv.customerId] || "Unknown";
-              const endDate = new Date(inv.endDate).toLocaleDateString();
-              const daysLeft = Math.ceil(
-                (new Date(inv.endDate) - now) / (1000 * 60 * 60 * 24),
-              );
-              return `• ${customerName}'s ${inv.type || "investment"} - ${endDate} (${daysLeft} days)`;
-            })
-            .join("\n");
-          const templateParams = {
-            to_email: profile.email,
-            to_name: profile.name || "User",
-            subject: "Investment End Date Reminders",
-            message: `You have ${emailUpcoming.length} investment(s) ending soon:\n\n${upcomingList}\n\nPlease review your investments.`,
-          };
-          await emailjs.send(
-            profile.emailjsServiceId,
-            profile.emailjsTemplateId,
-            templateParams,
-          );
-          console.log("Email notification sent successfully");
-        } catch (emailError) {
-          console.error("Error sending email notification:", emailError);
+        const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+        if (profile.lastEmailSentDate !== currentDate) {
+          try {
+            emailjs.init(profile.emailjsPublicKey);
+            const upcomingList = emailUpcoming
+              .map((inv) => {
+                const customerName = customerMap[inv.customerId] || "Unknown";
+                const endDate = new Date(inv.endDate).toLocaleDateString();
+                const daysLeft = Math.ceil(
+                  (new Date(inv.endDate) - now) / (1000 * 60 * 60 * 24),
+                );
+                return `• ${customerName}'s ${inv.type || "investment"} - ${endDate} (${daysLeft} days)`;
+              })
+              .join("\n");
+            const templateParams = {
+              to_email: profile.email,
+              to_name: profile.name || "User",
+              subject: "Investment End Date Reminders",
+              message: `You have ${emailUpcoming.length} investment(s) ending soon:\n\n${upcomingList}\n\nPlease review your investments.`,
+            };
+            await emailjs.send(
+              profile.emailjsServiceId,
+              profile.emailjsTemplateId,
+              templateParams,
+            );
+            console.log("Email notification sent successfully");
+            // Update last sent date
+            await updateUserProfile(userId, { lastEmailSentDate: currentDate });
+          } catch (emailError) {
+            console.error("Error sending email notification:", emailError);
+          }
+        } else {
+          console.log("Email already sent today, skipping.");
         }
       }
     } catch (error) {

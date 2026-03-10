@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 
 // TODO: replace with your own config values or load from environment
 const firebaseConfig = {
-  apiKey: "AIzaSyAZzpDhYlaSdqnWgWqIOlFgDPjYS79X9Tw",
-  authDomain: "practice-d96fb.firebaseapp.com",
-  databaseURL: "https://practice-d96fb-default-rtdb.firebaseio.com",
-  projectId: "practice-d96fb",
-  storageBucket: "practice-d96fb.firebasestorage.app",
-  messagingSenderId: "256851197100",
-  appId: "1:256851197100:web:caaf32fb74c0382eaff309",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
