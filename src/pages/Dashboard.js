@@ -132,9 +132,10 @@ export default function Dashboard() {
 
   // filter customers
   const filteredCustomers = useMemo(() => {
-    return customers.filter((c) =>
-      c.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      c.pan?.toLowerCase().includes(filter.toLowerCase()),
+    return customers.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(filter.toLowerCase()) ||
+        c.pan?.toLowerCase().includes(filter.toLowerCase()),
     );
   }, [customers, filter]);
 
@@ -159,7 +160,11 @@ export default function Dashboard() {
 
       // If there's only one investment, update it directly
       if (investmentsForRow.length === 1) {
-        await updateInvestment(currentUser.uid, investmentsForRow[0].id, updateObj);
+        await updateInvestment(
+          currentUser.uid,
+          investmentsForRow[0].id,
+          updateObj,
+        );
       } else {
         // If multiple investments, proportionally distribute the new amount
         const oldTotal = investmentsForRow.reduce(
