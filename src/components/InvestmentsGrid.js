@@ -27,6 +27,7 @@ export default function InvestmentsGrid({
   const [openDialog, setOpenDialog] = useState(false);
   const [editData, setEditData] = useState(null);
   const [newAmount, setNewAmount] = useState("");
+  const [newRemarks, setNewRemarks] = useState("");
 
   // get unique types
   const uniqueTypes = useMemo(() => {
@@ -36,6 +37,7 @@ export default function InvestmentsGrid({
   const handleEditClick = (investment) => {
     setEditData(investment);
     setNewAmount(investment.value?.toString() || "");
+    setNewRemarks(investment.remarks || "");
     setOpenDialog(true);
   };
 
@@ -52,6 +54,7 @@ export default function InvestmentsGrid({
     setOpenDialog(false);
     setEditData(null);
     setNewAmount("");
+    setNewRemarks("");
   };
 
   const handleSaveAmount = async () => {
@@ -66,9 +69,10 @@ export default function InvestmentsGrid({
       const { updateInvestment } = await import("../services/firestoreService");
       await updateInvestment(currentUser.uid, editData.id, {
         value: amount,
+        remarks: newRemarks || "",
       });
       // Trigger refresh via parent callback
-      onUpdateInvestment(editData, amount);
+      onUpdateInvestment(editData, amount, newRemarks);
       handleCloseDialog();
     } catch (error) {
       console.error("Error updating investment:", error);
@@ -138,11 +142,13 @@ export default function InvestmentsGrid({
           id: inv.id || idx,
           customerId: inv.customerId,
           customerName: customer?.name || "Unknown",
+          pan: customer?.pan || "",
           investmentType: inv.type,
           amount: inv.value || 0,
           value: inv.value || 0,
           startDate: inv.startDate,
           endDate: inv.endDate,
+          remarks: inv.remarks || "",
         };
       });
     } else {
@@ -151,14 +157,20 @@ export default function InvestmentsGrid({
       filtered.forEach((inv) => {
         const type = inv.type;
         if (!grouped[type]) {
-          grouped[type] = { type, totalAmount: 0, count: 0 };
+          grouped[type] = { type, totalAmount: 0, count: 0, pan: "" };
         }
         grouped[type].totalAmount += inv.value || 0;
         grouped[type].count += 1;
+        // set pan from first matching customer if not already set
+        if (!grouped[type].pan) {
+          const customer = customers.find((c) => c.id === inv.customerId);
+          grouped[type].pan = customer?.pan || "";
+        }
       });
       return Object.entries(grouped).map(([type, data], idx) => ({
         id: `${type}-${idx}`,
         investmentType: data.type,
+        pan: data.pan,
         totalAmount: data.totalAmount,
         count: data.count,
       }));
@@ -171,6 +183,14 @@ export default function InvestmentsGrid({
           field: "customerName",
           headerName: "Customer",
           width: 150,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "pan",
+          headerName: "PAN",
+          width: 140,
+          filterable: true,
           align: "center",
           headerAlign: "center",
         },
@@ -204,6 +224,14 @@ export default function InvestmentsGrid({
           headerAlign: "center",
         },
         {
+          field: "remarks",
+          headerName: "Remarks",
+          width: 200,
+          filterable: true,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
           field: "actions",
           headerName: "Actions",
           width: 120,
@@ -219,6 +247,14 @@ export default function InvestmentsGrid({
           field: "investmentType",
           headerName: "Investment Type",
           width: 150,
+          align: "center",
+          headerAlign: "center",
+        },
+        {
+          field: "pan",
+          headerName: "PAN",
+          width: 140,
+          filterable: true,
           align: "center",
           headerAlign: "center",
         },
@@ -338,6 +374,14 @@ export default function InvestmentsGrid({
             fullWidth
             margin="dense"
             inputProps={{ step: "0.01", min: "0" }}
+          />
+          <TextField
+            type="text"
+            label="Remarks"
+            value={newRemarks}
+            onChange={(e) => setNewRemarks(e.target.value)}
+            fullWidth
+            margin="dense"
           />
           {editData && (
             <Box sx={{ mt: 2, fontSize: "0.9rem", color: "gray" }}>

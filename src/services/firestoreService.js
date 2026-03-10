@@ -29,7 +29,9 @@ export async function getCustomers(agentId) {
 
 export async function addWorkLog(agentId, log) {
   const col = collection(db, "agents", agentId, "workLogs");
-  const docRef = await addDoc(col, log);
+  // ensure remarks field exists to avoid missing property
+  const logWithRemarks = { ...log, remarks: log.remarks || "" };
+  const docRef = await addDoc(col, logWithRemarks);
   return docRef.id;
 }
 

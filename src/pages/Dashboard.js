@@ -133,7 +133,8 @@ export default function Dashboard() {
   // filter customers
   const filteredCustomers = useMemo(() => {
     return customers.filter((c) =>
-      c.name?.toLowerCase().includes(filter.toLowerCase()),
+      c.name?.toLowerCase().includes(filter.toLowerCase()) ||
+      c.pan?.toLowerCase().includes(filter.toLowerCase()),
     );
   }, [customers, filter]);
 
@@ -142,8 +143,8 @@ export default function Dashboard() {
     return investments.reduce((sum, inv) => sum + (inv.value || 0), 0);
   }, [investments]);
 
-  // Handle update investment amount
-  const handleUpdateInvestment = async (rowData, newAmount) => {
+  // Handle update investment amount / remarks
+  const handleUpdateInvestment = async (rowData, newAmount, newRemarks) => {
     try {
       const investmentsForRow = investments.filter(
         (inv) =>
@@ -153,11 +154,12 @@ export default function Dashboard() {
 
       if (investmentsForRow.length === 0) return;
 
+      const updateObj = { value: newAmount };
+      if (newRemarks !== undefined) updateObj.remarks = newRemarks;
+
       // If there's only one investment, update it directly
       if (investmentsForRow.length === 1) {
-        await updateInvestment(currentUser.uid, investmentsForRow[0].id, {
-          value: newAmount,
-        });
+        await updateInvestment(currentUser.uid, investmentsForRow[0].id, updateObj);
       } else {
         // If multiple investments, proportionally distribute the new amount
         const oldTotal = investmentsForRow.reduce(
@@ -167,10 +169,9 @@ export default function Dashboard() {
         const ratio = oldTotal > 0 ? newAmount / oldTotal : 0;
 
         for (const inv of investmentsForRow) {
-          const newValue = inv.value * ratio;
-          await updateInvestment(currentUser.uid, inv.id, {
-            value: newValue,
-          });
+          const entryUpdate = { value: inv.value * ratio };
+          if (newRemarks !== undefined) entryUpdate.remarks = newRemarks;
+          await updateInvestment(currentUser.uid, inv.id, entryUpdate);
         }
       }
 

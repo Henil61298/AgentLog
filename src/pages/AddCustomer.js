@@ -14,6 +14,7 @@ export default function AddCustomer() {
     mobile: "",
     email: "",
     dob: "",
+    pan: "",
   });
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -37,6 +38,7 @@ export default function AddCustomer() {
         mobile: form.mobile,
         email: form.email,
         dob: form.dob,
+        pan: form.pan,
         portfolioValue: editingCustomer ? editingCustomer.portfolioValue : 0,
       };
 
@@ -57,6 +59,7 @@ export default function AddCustomer() {
         mobile: "",
         email: "",
         dob: "",
+        pan: "",
       });
     } catch (err) {
       console.error(err);
@@ -67,7 +70,7 @@ export default function AddCustomer() {
 
   const checkAndHandleExisting = async () => {
     const customers = await getCustomers(currentUser.uid);
-    const existing = customers.find((c) => c.email === form.email);
+    const existing = customers.find((c) => c.mobile === form.mobile);
     if (existing) {
       const edit = window.confirm(
         "Customer already exists. Do you want to edit it?",
@@ -81,6 +84,7 @@ export default function AddCustomer() {
           lastName: existing.lastName || "",
           mobile: existing.mobile || "",
           email: existing.email || "",
+          pan: existing.pan || "",
           dob: existing.dob || "",
         });
       }
@@ -136,9 +140,9 @@ export default function AddCustomer() {
           type="email"
           value={form.email}
           onChange={handleChange}
-          required
-          disabled={editMode}
         />
+        <label>PAN</label>
+        <input name="pan" value={form.pan} onChange={handleChange} />
         <label>Date of Birth</label>
         <input
           name="dob"
@@ -164,6 +168,7 @@ export default function AddCustomer() {
                 mobile: "",
                 email: "",
                 dob: "",
+                pan: "",
               });
             }}
           >

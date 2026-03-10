@@ -18,6 +18,7 @@ export default function Investments() {
   const [newType, setNewType] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [remarks, setRemarks] = useState("");
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function Investments() {
         startDate,
         endDate,
         type: selectedType,
+        remarks: remarks || "",
       });
       // reset form
       setSelectedCustomer("");
@@ -48,6 +50,7 @@ export default function Investments() {
       setStartDate("");
       setEndDate("");
       setSelectedType("");
+      setRemarks("");
       alert("Investment added!");
     } catch (err) {
       console.error(err);
@@ -121,6 +124,11 @@ export default function Investments() {
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
           required
+        />
+        <label>Remarks</label>
+        <textarea
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
         />
         <div
           style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}

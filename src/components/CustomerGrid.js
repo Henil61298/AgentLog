@@ -118,6 +118,14 @@ export default function CustomerGrid({
       headerAlign: "center",
     },
     {
+      field: "pan",
+      headerName: "PAN",
+      width: 140,
+      filterable: true,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
       field: "dob",
       headerName: "DOB",
       width: 120,
@@ -163,6 +171,7 @@ export default function CustomerGrid({
         name: c.name,
         email: c.email,
         mobile: c.mobile,
+        pan: c.pan || "", 
         dob: c.dob,
         investmentType: "-",
         totalAmount: 0,
@@ -196,8 +205,7 @@ export default function CustomerGrid({
           customerId: data.customerId,
           name: customer.name,
           email: customer.email,
-          mobile: customer.mobile,
-          dob: customer.dob,
+          mobile: customer.mobile,          pan: customer.pan || "",          dob: customer.dob,
           investmentType: data.type,
           totalAmount: data.total,
         });
