@@ -10,15 +10,14 @@ import {
 } from "../services/firestoreService";
 import CustomerGrid from "../components/CustomerGrid";
 import InvestmentsGrid from "../components/InvestmentsGrid";
-import Insights from "../components/Insights";
 import emailjs from "@emailjs/browser";
 
 export default function Dashboard() {
   const [customers, setCustomers] = useState([]);
   const [investments, setInvestments] = useState([]);
-  const [filter, setFilter] = useState("");
+  const [filter] = useState("");
 
-  const { logout, currentUser } = useAuth();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (!currentUser) return;

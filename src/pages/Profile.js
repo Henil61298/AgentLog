@@ -40,41 +40,42 @@ export default function Profile() {
 
   useEffect(() => {
     if (!currentUser) return;
+    const loadProfile = async () => {
+      try {
+        const data = await getUserProfile(currentUser.uid);
+        if (data) {
+          setProfile({
+            name: data.name || "",
+            email: data.email || currentUser.email || "",
+            phone: data.phone || "",
+            address: data.address || "",
+            company: data.company || "",
+            // migrate old single value if present
+            browserNotificationDays:
+              data.browserNotificationDays || data.notificationDays || 7,
+            emailNotificationDays:
+              data.emailNotificationDays || data.notificationDays || 7,
+            enableBrowserNotifications:
+              data.enableBrowserNotifications || false,
+            enableEmailNotifications: data.enableEmailNotifications || false,
+            emailjsServiceId: data.emailjsServiceId || "",
+            emailjsTemplateId: data.emailjsTemplateId || "",
+            emailjsPublicKey: data.emailjsPublicKey || "",
+          });
+        } else {
+          // Initialize with current user email
+          setProfile((prev) => ({
+            ...prev,
+            email: currentUser.email || "",
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      }
+    };
+
     loadProfile();
   }, [currentUser]);
-
-  const loadProfile = async () => {
-    try {
-      const data = await getUserProfile(currentUser.uid);
-      if (data) {
-        setProfile({
-          name: data.name || "",
-          email: data.email || currentUser.email || "",
-          phone: data.phone || "",
-          address: data.address || "",
-          company: data.company || "",
-          // migrate old single value if present
-          browserNotificationDays:
-            data.browserNotificationDays || data.notificationDays || 7,
-          emailNotificationDays:
-            data.emailNotificationDays || data.notificationDays || 7,
-          enableBrowserNotifications: data.enableBrowserNotifications || false,
-          enableEmailNotifications: data.enableEmailNotifications || false,
-          emailjsServiceId: data.emailjsServiceId || "",
-          emailjsTemplateId: data.emailjsTemplateId || "",
-          emailjsPublicKey: data.emailjsPublicKey || "",
-        });
-      } else {
-        // Initialize with current user email
-        setProfile((prev) => ({
-          ...prev,
-          email: currentUser.email || "",
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    }
-  };
 
   const handleSave = async () => {
     if (!currentUser) return;
