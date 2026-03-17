@@ -158,7 +158,8 @@ export default function Dashboard() {
       const investmentsForRow = investments.filter(
         (inv) =>
           inv.customerId === rowData.customerId &&
-          inv.type === rowData.investmentType,
+          inv.type === rowData.investmentType &&
+          inv.id === rowData.id,
       );
 
       if (investmentsForRow.length === 0) return;
@@ -166,27 +167,11 @@ export default function Dashboard() {
       const updateObj = { value: newAmount };
       if (newRemarks !== undefined) updateObj.remarks = newRemarks;
 
-      // If there's only one investment, update it directly
-      if (investmentsForRow.length === 1) {
-        await updateInvestment(
-          currentUser.uid,
-          investmentsForRow[0].id,
-          updateObj,
-        );
-      } else {
-        // If multiple investments, proportionally distribute the new amount
-        const oldTotal = investmentsForRow.reduce(
-          (sum, inv) => sum + (inv.value || 0),
-          0,
-        );
-        const ratio = oldTotal > 0 ? newAmount / oldTotal : 0;
-
-        for (const inv of investmentsForRow) {
-          const entryUpdate = { value: inv.value * ratio };
-          if (newRemarks !== undefined) entryUpdate.remarks = newRemarks;
-          await updateInvestment(currentUser.uid, inv.id, entryUpdate);
-        }
-      }
+      await updateInvestment(
+        currentUser.uid,
+        investmentsForRow[0].id,
+        updateObj,
+      );
 
       // Refresh investments
       const updatedInvestments = await getAllInvestments(currentUser.uid);
