@@ -10,7 +10,6 @@ import {
   Button,
   Box,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 
@@ -26,22 +25,6 @@ export default function CustomerGrid({
   const [openDialog, setOpenDialog] = useState(false);
   const [editData, setEditData] = useState(null);
   const [newAmount, setNewAmount] = useState("");
-
-  const handleEditClick = (rowData) => {
-    setEditData(rowData);
-    // Calculate total amount for that customer-type combo
-    const investmentsForRow = investments.filter(
-      (inv) =>
-        inv.customerId === rowData.customerId &&
-        inv.type === rowData.investmentType,
-    );
-    const total = investmentsForRow.reduce(
-      (sum, inv) => sum + (inv.value || 0),
-      0,
-    );
-    setNewAmount(total.toString());
-    setOpenDialog(true);
-  };
 
   const handleDeleteClick = (rowData) => {
     if (
@@ -73,13 +56,6 @@ export default function CustomerGrid({
   const RenderActionButtons = (params) => {
     return (
       <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-        <IconButton
-          size="small"
-          onClick={() => handleEditClick(params.row)}
-          title="Edit Amount"
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
         <IconButton
           size="small"
           color="error"
