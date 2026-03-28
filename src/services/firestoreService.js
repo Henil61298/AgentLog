@@ -62,6 +62,36 @@ export async function getAllInvestments(agentId) {
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+export async function addGroup(agentId, group) {
+  const col = collection(db, "agents", agentId, "groups");
+  const docRef = await addDoc(col, {
+    ...group,
+    customerIds: group.customerIds || [],
+    createdAt: group.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  return docRef.id;
+}
+
+export async function getGroups(agentId) {
+  const col = collection(db, "agents", agentId, "groups");
+  const snapshot = await getDocs(col);
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function updateGroup(agentId, groupId, updates) {
+  const ref = doc(db, "agents", agentId, "groups", groupId);
+  await updateDoc(ref, {
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function deleteGroup(agentId, groupId) {
+  const ref = doc(db, "agents", agentId, "groups", groupId);
+  await deleteDoc(ref);
+}
+
 export async function updateCustomer(agentId, customerId, updates) {
   const ref = doc(db, "agents", agentId, "customers", customerId);
   await updateDoc(ref, updates);

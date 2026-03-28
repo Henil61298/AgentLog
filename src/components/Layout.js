@@ -7,6 +7,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import InsightsIcon from "@mui/icons-material/Insights";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import GroupIcon from "@mui/icons-material/Group";
 
 export default function Layout({ children }) {
   const { currentUser, logout } = useAuth();
@@ -84,6 +85,14 @@ export default function Layout({ children }) {
             >
               <TrendingUpIcon />
               <span>Investments</span>
+            </Link>
+            <Link
+              to="/groups"
+              className={`sidebar-link ${location.pathname === "/groups" ? "active" : ""}`}
+              title="Groups"
+            >
+              <GroupIcon />
+              <span>Groups</span>
             </Link>
             <Link
               to="/add-customer"

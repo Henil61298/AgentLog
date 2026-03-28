@@ -19,6 +19,10 @@ export default function InvestmentsGrid({
   onUpdateInvestment,
   onDeleteInvestment,
   currentUser,
+  customerIdsFilter = null,
+  showCustomerFilter = true,
+  title = "Investments",
+  groupByType = true,
 }) {
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
@@ -116,6 +120,10 @@ export default function InvestmentsGrid({
 
   // filter investments by date range
   const filtered = useMemo(() => {
+    const allowedCustomerIds = Array.isArray(customerIdsFilter)
+      ? new Set(customerIdsFilter)
+      : null;
+
     return investments.filter((inv) => {
       const invStart = inv.startDate ? new Date(inv.startDate) : null;
       const filterStart = startDateFilter ? new Date(startDateFilter) : null;
@@ -126,32 +134,43 @@ export default function InvestmentsGrid({
 
       if (typeFilter && inv.type !== typeFilter) return false;
       if (customerFilter && inv.customerId !== customerFilter) return false;
+      if (allowedCustomerIds && !allowedCustomerIds.has(inv.customerId))
+        return false;
 
       return true;
     });
-  }, [investments, startDateFilter, endDateFilter, typeFilter, customerFilter]);
+  }, [
+    investments,
+    startDateFilter,
+    endDateFilter,
+    typeFilter,
+    customerFilter,
+    customerIdsFilter,
+  ]);
 
-  // group by type when no date filter
   const hasDateFilter = startDateFilter || endDateFilter;
   const displayData = useMemo(() => {
-    if (hasDateFilter) {
-      // show individual records
-      return filtered.map((inv, idx) => {
-        const customer = customers.find((c) => c.id === inv.customerId);
-        return {
-          id: inv.id || idx,
-          customerId: inv.customerId,
-          customerName: customer?.name || "Unknown",
-          pan: customer?.pan || "",
-          investmentType: inv.type,
-          amount: inv.value || 0,
-          value: inv.value || 0,
-          startDate: inv.startDate,
-          endDate: inv.endDate,
-          remarks: inv.remarks || "",
-        };
-      });
-    } else {
+    const individualRows = filtered.map((inv, idx) => {
+      const customer = customers.find((c) => c.id === inv.customerId);
+      return {
+        id: inv.id || idx,
+        customerId: inv.customerId,
+        customerName: customer?.name || "Unknown",
+        pan: customer?.pan || "",
+        investmentType: inv.type,
+        amount: inv.value || 0,
+        value: inv.value || 0,
+        startDate: inv.startDate,
+        endDate: inv.endDate,
+        remarks: inv.remarks || "",
+      };
+    });
+
+    if (hasDateFilter || !groupByType) {
+      return individualRows;
+    }
+
+    {
       // group by type and sum
       const grouped = {};
       filtered.forEach((inv) => {
@@ -175,9 +194,9 @@ export default function InvestmentsGrid({
         count: data.count,
       }));
     }
-  }, [filtered, hasDateFilter, customers]);
+  }, [filtered, hasDateFilter, groupByType, customers]);
 
-  const columns = hasDateFilter
+  const columns = hasDateFilter || !groupByType
     ? [
         {
           field: "customerName",
@@ -277,21 +296,23 @@ export default function InvestmentsGrid({
       ];
 
   const totalAmount = displayData.reduce((sum, row) => {
-    const value = hasDateFilter ? row.amount : row.totalAmount;
+    const value = hasDateFilter || !groupByType ? row.amount : row.totalAmount;
     return sum + (value || 0);
   }, 0);
 
   return (
-    <div>
+    <div style={{ width: "100%", minWidth: 0, maxWidth: "100%" }}>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "1rem",
+          gap: "1rem",
+          flexWrap: "wrap",
         }}
       >
-        <h2>Investments</h2>
+        <h2>{title}</h2>
         <div className="portfolio-value">
           Total Portfolio Value: ₹ {totalAmount.toLocaleString()}
         </div>
@@ -300,11 +321,15 @@ export default function InvestmentsGrid({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 240px))",
             gap: "1rem",
+            alignItems: "end",
+            justifyContent: "start",
+            width: "100%",
+            maxWidth: "100%",
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <label>Start Date Filter</label>
             <input
               type="date"
@@ -312,7 +337,7 @@ export default function InvestmentsGrid({
               onChange={(e) => setStartDateFilter(e.target.value)}
             />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <label>End Date Filter</label>
             <input
               type="date"
@@ -320,7 +345,7 @@ export default function InvestmentsGrid({
               onChange={(e) => setEndDateFilter(e.target.value)}
             />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <label>Investment Type</label>
             <select
               value={typeFilter}
@@ -334,30 +359,35 @@ export default function InvestmentsGrid({
               ))}
             </select>
           </div>
-          <div>
-            <label>Customer</label>
-            <select
-              value={customerFilter}
-              onChange={(e) => setCustomerFilter(e.target.value)}
-            >
-              <option value="">All Customers</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {showCustomerFilter && (
+            <div style={{ minWidth: 0 }}>
+              <label>Customer</label>
+              <select
+                value={customerFilter}
+                onChange={(e) => setCustomerFilter(e.target.value)}
+              >
+                <option value="">All Customers</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
-      {!hasDateFilter && (
+      {groupByType && !hasDateFilter && (
         <p style={{ fontWeight: "bold", marginBottom: "1rem" }}>
           Grouped by Investment Type (Individual mode when date filters active)
         </p>
       )}
 
-      <div style={{ height: 400, width: "100%" }} className="data-grid-card">
+      <div
+        style={{ height: 400, width: "100%", minWidth: 0, maxWidth: "100%" }}
+        className="data-grid-card"
+      >
         <DataGrid rows={displayData} columns={columns} pageSize={5} />
       </div>
 
