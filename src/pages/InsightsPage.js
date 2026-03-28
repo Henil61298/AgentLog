@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { getAllInvestments, getCustomers } from "../services/firestoreService";
+import SearchableSelect from "../components/SearchableSelect";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   LineChart,
@@ -178,20 +179,19 @@ export default function InsightsPage() {
         <button onClick={clearFilters} style={{ margin: "0 0.5rem" }}>
           Clear
         </button>
-        <div style={{ marginTop: "10px" }}>
-          <label style={{ margin: "0 0.5rem" }}>Customer:</label>
+        <div style={{ marginTop: "10px", maxWidth: 320 }}>
+          <SearchableSelect
+            label="Customer"
+            placeholder="All"
+            value={customerFilter}
+            onChange={setCustomerFilter}
+            options={customers.map((c) => ({
+              label: c.name || "Unknown",
+              value: c.id,
+            }))}
+            noOptionsText="No customers available"
+          />
         </div>
-        <select
-          value={customerFilter}
-          onChange={(e) => setCustomerFilter(e.target.value)}
-        >
-          <option value="">All</option>
-          {customers.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
       </div>
 
       {startDateFilter && endDateFilter && (

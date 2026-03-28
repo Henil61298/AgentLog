@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
+import SearchableSelect from "./SearchableSelect";
 import {
   Dialog,
   DialogTitle,
@@ -196,104 +197,105 @@ export default function InvestmentsGrid({
     }
   }, [filtered, hasDateFilter, groupByType, customers]);
 
-  const columns = hasDateFilter || !groupByType
-    ? [
-        {
-          field: "customerName",
-          headerName: "Customer",
-          width: 150,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "pan",
-          headerName: "PAN",
-          width: 140,
-          filterable: true,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "investmentType",
-          headerName: "Type",
-          width: 120,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "amount",
-          headerName: "Amount",
-          width: 130,
-          type: "number",
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "startDate",
-          headerName: "Start Date",
-          width: 130,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "endDate",
-          headerName: "End Date",
-          width: 130,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "remarks",
-          headerName: "Remarks",
-          width: 200,
-          filterable: true,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "actions",
-          headerName: "Actions",
-          width: 120,
-          sortable: false,
-          filterable: false,
-          align: "center",
-          headerAlign: "center",
-          renderCell: RenderActionButtons,
-        },
-      ]
-    : [
-        {
-          field: "investmentType",
-          headerName: "Investment Type",
-          width: 150,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "pan",
-          headerName: "PAN",
-          width: 140,
-          filterable: true,
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "totalAmount",
-          headerName: "Total Amount",
-          width: 150,
-          type: "number",
-          align: "center",
-          headerAlign: "center",
-        },
-        {
-          field: "count",
-          headerName: "Count",
-          width: 100,
-          type: "number",
-          align: "center",
-          headerAlign: "center",
-        },
-      ];
+  const columns =
+    hasDateFilter || !groupByType
+      ? [
+          {
+            field: "customerName",
+            headerName: "Customer",
+            width: 150,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "pan",
+            headerName: "PAN",
+            width: 140,
+            filterable: true,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "investmentType",
+            headerName: "Type",
+            width: 120,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "amount",
+            headerName: "Amount",
+            width: 130,
+            type: "number",
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "startDate",
+            headerName: "Start Date",
+            width: 130,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "endDate",
+            headerName: "End Date",
+            width: 130,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "remarks",
+            headerName: "Remarks",
+            width: 200,
+            filterable: true,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "actions",
+            headerName: "Actions",
+            width: 120,
+            sortable: false,
+            filterable: false,
+            align: "center",
+            headerAlign: "center",
+            renderCell: RenderActionButtons,
+          },
+        ]
+      : [
+          {
+            field: "investmentType",
+            headerName: "Investment Type",
+            width: 150,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "pan",
+            headerName: "PAN",
+            width: 140,
+            filterable: true,
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "totalAmount",
+            headerName: "Total Amount",
+            width: 150,
+            type: "number",
+            align: "center",
+            headerAlign: "center",
+          },
+          {
+            field: "count",
+            headerName: "Count",
+            width: 100,
+            type: "number",
+            align: "center",
+            headerAlign: "center",
+          },
+        ];
 
   const totalAmount = displayData.reduce((sum, row) => {
     const value = hasDateFilter || !groupByType ? row.amount : row.totalAmount;
@@ -345,34 +347,32 @@ export default function InvestmentsGrid({
               onChange={(e) => setEndDateFilter(e.target.value)}
             />
           </div>
-          <div style={{ minWidth: 0 }}>
-            <label>Investment Type</label>
-            <select
+          <div style={{ minWidth: 0, marginBottom: "0.5rem" }}>
+            <SearchableSelect
+              label="Investment Type"
+              placeholder="All Types"
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
-              <option value="">All Types</option>
-              {uniqueTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+              onChange={setTypeFilter}
+              options={uniqueTypes.map((type) => ({
+                label: type,
+                value: type,
+              }))}
+              noOptionsText="No types available"
+            />
           </div>
           {showCustomerFilter && (
-            <div style={{ minWidth: 0 }}>
-              <label>Customer</label>
-              <select
+            <div style={{ minWidth: 0, marginBottom: "0.5rem" }}>
+              <SearchableSelect
+                label="Customer"
+                placeholder="All Customers"
                 value={customerFilter}
-                onChange={(e) => setCustomerFilter(e.target.value)}
-              >
-                <option value="">All Customers</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setCustomerFilter}
+                options={customers.map((c) => ({
+                  label: c.name || "Unknown",
+                  value: c.id,
+                }))}
+                noOptionsText="No customers available"
+              />
             </div>
           )}
         </div>

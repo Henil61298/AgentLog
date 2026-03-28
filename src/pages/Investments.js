@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import SearchableSelect from "../components/SearchableSelect";
 import {
   getCustomers,
   addWorkLog,
@@ -78,32 +79,32 @@ export default function Investments() {
     <div className="form-page-wrapper">
       <h1>Manage Investments</h1>
       <form onSubmit={handleSubmit}>
-        <label>Customer</label>
-        <select
-          value={selectedCustomer}
-          onChange={(e) => setSelectedCustomer(e.target.value)}
-          required
-        >
-          <option value="">Select Customer</option>
-          {customers.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <label>Investment Type</label>
-        <select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          required
-        >
-          <option value="">Select Type</option>
-          {investmentTypes.map((t) => (
-            <option key={t.id} value={t.name}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+        <div style={{ marginBottom: "1rem" }}>
+          <SearchableSelect
+            label="Customer"
+            placeholder="Select customer"
+            value={selectedCustomer}
+            onChange={setSelectedCustomer}
+            options={customers.map((c) => ({
+              label: c.name || "Unknown",
+              value: c.id,
+            }))}
+            noOptionsText="No customers available"
+          />
+        </div>
+        <div style={{ marginBottom: "1rem" }}>
+          <SearchableSelect
+            label="Investment Type"
+            placeholder="Select type"
+            value={selectedType}
+            onChange={setSelectedType}
+            options={investmentTypes.map((t) => ({
+              label: t.name,
+              value: t.name,
+            }))}
+            noOptionsText="No types available"
+          />
+        </div>
         <label>Amount</label>
         <input
           type="number"

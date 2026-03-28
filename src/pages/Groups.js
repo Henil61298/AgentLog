@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import {
-  Autocomplete,
-  Checkbox,
-  TextField,
-} from "@mui/material";
+import SearchableSelect from "../components/SearchableSelect";
 import {
   addGroup,
   deleteGroup,
@@ -197,19 +193,19 @@ export default function Groups() {
         >
           <h2>Manage Group</h2>
           <form onSubmit={handleSaveGroup}>
-            <label>Existing Group</label>
-            <select
-              value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
-              style={{ width: "100%", marginBottom: "0.75rem" }}
-            >
-              <option value="">Create new group</option>
-              {groups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
+            <div style={{ marginBottom: "0.75rem" }}>
+              <SearchableSelect
+                label="Existing Group"
+                placeholder="Create new group"
+                value={selectedGroupId}
+                onChange={setSelectedGroupId}
+                options={groups.map((group) => ({
+                  label: group.name || "Untitled group",
+                  value: group.id,
+                }))}
+                noOptionsText="No groups available"
+              />
+            </div>
 
             <label>Group Name</label>
             <input
@@ -221,37 +217,23 @@ export default function Groups() {
               required
             />
 
-            <div style={{ marginBottom: "0.75rem" }}>
-              <strong>Members</strong>
-              <Autocomplete
+            <label>Members</label>
+            <div style={{ marginBottom: "0.75rem", marginTop: "0.25rem" }}>
+              <SearchableSelect
                 multiple
-                disableCloseOnSelect
-                options={customers}
-                value={customers.filter((customer) =>
-                  selectedCustomerIds.includes(customer.id),
-                )}
-                onChange={(_, newValue) => {
-                  setSelectedCustomerIds(newValue.map((customer) => customer.id));
-                }}
-                getOptionLabel={(option) => option.name || ""}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
+                placeholder="Search and select members"
+                value={selectedCustomerIds}
+                onChange={setSelectedCustomerIds}
+                options={customers.map((customer) => ({
+                  label: customer.name || "Unknown",
+                  value: customer.id,
+                }))}
                 noOptionsText={
-                  customers.length === 0 ? "No customers available" : "No matches"
+                  customers.length === 0
+                    ? "No customers available"
+                    : "No matches"
                 }
-                renderOption={(props, option, { selected }) => (
-                  <li {...props} key={option.id}>
-                    <Checkbox sx={{ mr: 1 }} checked={selected} />
-                    <span>{option.name}</span>
-                  </li>
-                )}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="Search and select members"
-                    margin="dense"
-                  />
-                )}
-                sx={{ marginTop: "0.5rem" }}
+                fullWidth
               />
             </div>
 
@@ -303,7 +285,9 @@ export default function Groups() {
                 {selectedCustomers.map((customer) => (
                   <li key={customer.id}>{customer.name}</li>
                 ))}
-                {selectedCustomers.length === 0 && <li>No members selected.</li>}
+                {selectedCustomers.length === 0 && (
+                  <li>No members selected.</li>
+                )}
               </ul>
             ) : (
               <p style={{ margin: 0 }}>
